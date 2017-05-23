@@ -69,6 +69,16 @@ RUN mkdir /bazel && \
 RUN git clone --recurse-submodules https://github.com/tensorflow/serving && \
   cd serving && \
   git checkout
+  
+# hotfix for nccl issue:
+# https://github.com/tensorflow/serving/issues/336
+# https://github.com/tensorflow/serving/issues/327 
+# https://github.com/tensorflow/tensorflow/blob/ccf9a752f9f10cbee2f4f53b0d46a5951d620922/tensorflow/contrib/BUILD
+RUN cat /serving/tensorflow/tensorflow/contrib/BUILD \    
+  | grep -v '   "//tensorflow/contrib/nccl:nccl_py",' \  
+  | grep -v '   "//tensorflow/contrib/nccl:nccl_kernels",' \
+  | grep -v '   "//tensorflow/contrib/nccl:nccl_ops_op_lib",' \
+  > /tmp/BUILD && mv /tmp/BUILD /serving/tensorflow/tensorflow/contrib/BUILD
 
 # Build TensorFlow with the CUDA configuration
 ENV CI_BUILD_PYTHON python
